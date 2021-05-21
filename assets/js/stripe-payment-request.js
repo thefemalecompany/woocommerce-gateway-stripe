@@ -180,6 +180,17 @@ jQuery( function( $ ) {
 		 * @param {Object}          message DOM object with error message to display.
 		 */
 		abortPayment: function( payment, message ) {
+			if (message.includes("showlogin")) {
+				$.when(
+					$.ajax({
+						type: "GET",
+						data: "",
+						url: wc_stripe_payment_request.getAjaxURL(
+							"redirect_to_my_account"
+						),
+					})
+				).then((r) => (window.location = r.data.url));
+			}
 			payment.complete( 'fail' );
 			wc_stripe_payment_request.displayErrorMessage( message );
 		},
@@ -377,6 +388,16 @@ jQuery( function( $ ) {
 					paymentRequestType = result.applePay ? 'apple_pay' : 'payment_request_api';
 					wc_stripe_payment_request.attachPaymentRequestButtonEventListeners( prButton, paymentRequest );
 					wc_stripe_payment_request.showPaymentRequestButton( prButton );
+
+					// When on cart, auto-perform show of payment process for easy continuing
+					if (
+						$(document.body).hasClass("woocommerce-cart") &&
+						window.location.search.includes(
+							"wc-stripe=resume_payment_request"
+						)
+					) {
+						paymentRequest.show();
+					}
 				} );
 
 				// Possible statuses success, fail, invalid_payer_name, invalid_payer_email, invalid_payer_phone, invalid_shipping_address.

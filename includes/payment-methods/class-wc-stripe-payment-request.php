@@ -95,8 +95,10 @@ class WC_Stripe_Payment_Request {
 		}
 
 		add_action( 'template_redirect', [ $this, 'set_session' ] );
+		add_filter( 'woocommerce_login_redirect', [ $this, 'resume_payment_request' ] );
 		$this->init();
 	}
+
 
 	/**
 	 * Checks whether authentication is required for checkout.
@@ -202,11 +204,15 @@ class WC_Stripe_Payment_Request {
 		add_action( 'wc_ajax_wc_stripe_get_selected_product_data', [ $this, 'ajax_get_selected_product_data' ] );
 		add_action( 'wc_ajax_wc_stripe_clear_cart', [ $this, 'ajax_clear_cart' ] );
 		add_action( 'wc_ajax_wc_stripe_log_errors', [ $this, 'ajax_log_errors' ] );
+		add_action( 'wc_ajax_wc_stripe_redirect_to_my_account', [ $this, 'ajax_redirect_to_my_account' ] );
+
 
 		add_filter( 'woocommerce_gateway_title', [ $this, 'filter_gateway_title' ], 10, 2 );
 		add_filter( 'woocommerce_validate_postcode', [ $this, 'postal_code_validation' ], 10, 3 );
 
 		add_action( 'woocommerce_checkout_order_processed', [ $this, 'add_order_meta' ], 10, 2 );
+
+		add_action( 'template_redirect', [ $this, 'my_account_login_check' ] );
 	}
 
 	/**
@@ -1483,6 +1489,43 @@ class WC_Stripe_Payment_Request {
 				'pending' => false,
 			],
 		];
+	}
+
+	/**
+	 * Redirect to cart after successful login with resume_payment_request
+	 *
+	 * @return string|null
+	 */
+	public function resume_payment_request(): ?string {
+		if ( isset( $_REQUEST['wc-stripe'] ) && 'resume_payment_request' === $_REQUEST['wc-stripe'] ) {
+			return add_query_arg( 'wc-stripe', 'resume_payment_request', wc_get_cart_url() );
+		}
+	}
+
+	public function ajax_redirect_to_my_account(): void {
+		if (
+			! is_user_logged_in()
+			&& ( is_woocommerce() || is_cart() || is_checkout() )
+		) {
+			$data = array(
+				'success' => 1,
+				'url'     => add_query_arg( 'wc-stripe', 'resume_payment_request', get_permalink( get_option( 'woocommerce_myaccount_page_id' ) ) ),
+			);
+
+			wp_send_json_success( $data );
+		}
+		wp_send_json_success( array() );
+	}
+
+	/**
+	 * Display error notices after failed express checkout
+	 *
+	 **/
+	public function my_account_login_check(): void {
+		if ( isset( $_REQUEST['wc-stripe'] ) && 'resume_payment_request' === $_REQUEST['wc-stripe'] && ! is_user_logged_in() && is_account_page() ) {
+			wc_add_notice( __( 'Please login with your account to perform the checkout', 'woocommerce-gateway-stripe' ), 'error' );
+			wc_print_notices();
+		}
 	}
 }
 
