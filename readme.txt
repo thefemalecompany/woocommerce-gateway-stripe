@@ -4,7 +4,7 @@ Tags: credit card, stripe, apple pay, payment request, google pay, sepa, sofort,
 Requires at least: 4.4
 Tested up to: 5.6
 Requires PHP: 5.6
-Stable tag: 5.1.0
+Stable tag: 5.2.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 Attributions: thorsten-stripe
@@ -126,10 +126,20 @@ If you get stuck, you can ask for help in the Plugin Forum.
 
 == Changelog ==
 
-= 5.1.0 - 2021-04-07 =
+= 5.2.0 - 2021-05-19 =
 
-* Fix - Don't attempt to submit level 3 data for non-US merchants.
-* Fix - Hide Payment Request Buttons when guest checkout is disabled.
-* Fix - Match Payment Request states with WooCommerce states.
+* Fix - Use `get_parent` method to avoid accessing `order` subscription property directly.
+* Fix - Orders won't transition to 'Refunded' state if refund can't be created.
+* Fix - Normalize United Kingdom and Canada postal codes for Apple Pay.
+* Fix - Subscription sign-up fees not included in total for Payment Request Button.
+* Fix - Reduce requests sent to server from stripe settings page.
+* Fix - Choose the appropriate version of the WooCommerce Admin Notes API based on which API is available.
+* Fix - Customer information is now correctly displayed in the Stripe Payments Dashboard when a new customer checks out through the WooCommerce Checkout Block.
+* Fix - Pass customer language/locale to Stripe upon creation or modification.
+* Fix - Initial price for Variable Products is now correctly shown when a Payment Request is started.
+* Add - Support for Credit Card payments (incl. 3DS payments) via WooCommerce Blocks; limited to WooCommerce Core product types.
+* Add - Support for payments (incl. 3DS payments) paid via Payment Request Buttons in WooCommerce Blocks; limited to WooCommerce Core product types.
+* Add - Support for custom and branded Payment Request Buttons when using the Cart and Checkout blocks.
+* Tweak - Should customer opt to save their card, the card is now saved after a payment has been confirmed.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-gateway-stripe/trunk/changelog.txt).
