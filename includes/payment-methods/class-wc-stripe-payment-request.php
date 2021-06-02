@@ -1563,12 +1563,14 @@ class WC_Stripe_Payment_Request {
 	/**
 	 * Redirect to cart after successful login with resume_payment_request
 	 *
-	 * @return string|null
+	 * @return string
 	 */
-	public function resume_payment_request(): ?string {
+	public function resume_payment_request( $redirect ): string {
 		if ( isset( $_REQUEST['wc-stripe'] ) && 'resume_payment_request' === $_REQUEST['wc-stripe'] ) {
 			return add_query_arg( 'wc-stripe', 'resume_payment_request', wc_get_cart_url() );
 		}
+
+		return $redirect;
 	}
 
 	public function ajax_redirect_to_my_account(): void {
